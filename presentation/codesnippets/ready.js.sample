@@ -1,0 +1,16 @@
+[actions.setRendered]: function * ({ payload }) {
+  if (isHeadless()) {
+    Array.from(document.querySelectorAll('script')).forEach(script => {
+      script.remove()
+    })
+
+    window.READY_TO_RENDER = true
+    console.log('READY_TO_RENDER:', window.READY_TO_RENDER)
+  }
+},
+
+// elsewhere
+
+render () {
+  return <AsyncComponent whenReady={() => actions.setRendered(true)} />
+}

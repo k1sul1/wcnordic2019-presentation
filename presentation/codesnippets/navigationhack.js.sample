@@ -1,0 +1,95 @@
+import CodeSlideComponent from 'spectacle-code-slide'
+
+const extractNumberFromString = x => {
+  const matches = x.match(/\d.*/gm)
+  const value = matches ? matches[0] : null
+
+  return value ? parseInt(value, 10) : null
+}
+
+export default class Presentation extends React.Component {
+  constructor(props) {
+    super(props)
+
+    this.handleShittyRemote = this.handleShittyRemote.bind(this)
+    this.guessTheSlide = this.guessTheSlide.bind(this)
+
+    this.slideNumber = extractNumberFromString(window.location.hash) // Including it in state causes rerenders
+
+    this.state = {
+      verticalMode: false,
+      codeSlideComponent: CodeSlideComponent,
+    }
+  }
+
+  // Hack: listen to remote keys and move up and down in code slides
+  handleShittyRemote(e) {
+    const { slideNumber: number, state } = this
+    const { verticalMode} = state
+    const lsKey = `code-slide:${number}`
+    const currentRange = parseInt(localStorage.getItem(lsKey), 10)
+
+
+    // The "fullscreen" key on the remote
+    if (e.code === 'Period') {
+      this.setState({
+        verticalMode: !verticalMode,
+      })
+    }
+
+    if (verticalMode) {
+      // The prev & next slide keys on the remote
+      if (e.key === 'PageUp') {
+        this.setState({
+          codeSlideComponent: () => null,
+        }, () => {
+          const newRange = currentRange - 1
+          localStorage.setItem(lsKey, newRange)
+
+          this.setState({
+            codeSlideComponent: CodeSlideComponent,
+          })
+        })
+      } else if (e.key === 'PageDown') {
+        this.setState({
+          codeSlideComponent: () => null,
+        }, () => {
+          const newRange = currentRange + 1
+          localStorage.setItem(lsKey, newRange)
+
+          this.setState({
+            codeSlideComponent: CodeSlideComponent,
+          })
+        })
+      }
+
+      e.preventDefault()
+      e.stopPropagation()
+      return false;
+    }
+  }
+
+  guessTheSlide(e) {
+    const { newURL } = e
+    const url = new URL(newURL)
+
+    this.slideNumber = extractNumberFromString(url.hash)
+  }
+
+  componentDidMount() {
+    window.addEventListener('keydown', this.handleShittyRemote, {
+      capture: true,
+      passive: false,
+    })
+    window.addEventListener('hashchange', this.guessTheSlide)
+  }
+
+  render() {
+    const CodeSlide = this.state.codeSlideComponent
+    return (
+      <Deck>
+        <CodeSlide />
+      </Deck>
+    )
+  }
+}

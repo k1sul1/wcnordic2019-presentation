@@ -1,0 +1,38 @@
+const untilAppSaysReady = page.waitForFunction('window.READY_TO_RENDER === true')
+
+// Disable image loading to make rendering a lot faster,
+await page.setRequestInterception(true)
+page.on('request', request => {
+  if (/media|image|font/.test(request.resourceType())) {
+    request.abort()
+  } else {
+    request.continue()
+  }
+});
+
+await page.setViewport({ width: 1920, height: 1080 })
+
+await page.goto(
+  fullURL,
+  {
+    // waitUntil: 'networkidle0', // Ads make the page load significantly longer, don't wait for that
+  }
+)
+
+await untilAppSaysReady
+
+// Get HTTP "status" from the page in order to serve more than 200s
+const status = await page.evaluate((fullURL) => {
+  let element = document.querySelector('meta[name="http:status"]')
+
+  if (element) {
+    return parseInt(element.getAttribute('content'), 10)
+  }
+
+  console.log(`Missing status tag: ${fullURL}`)
+  return 200
+}, fullURL)
+
+const html = await page.content()
+
+// html can be used directly for response

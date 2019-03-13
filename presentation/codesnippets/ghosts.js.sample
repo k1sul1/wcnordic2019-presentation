@@ -1,0 +1,28 @@
+/**
+ * WTF?
+
+ * In short, styled-components provides API to export styles to HTML string,
+ * but the official API (ServerStyleSheet) works only on the server side.
+ * Because our SSR is being executed in browser env (eg. client)
+ * we have to abuse the secret API to be able to access the styles and then
+ * append them to DOM to be served/cached.
+ *
+ * https://github.com/styled-components/styled-components/issues/1487
+ */
+import {
+  __DO_NOT_USE_OR_YOU_WILL_BE_HAUNTED_BY_SPOOKY_GHOSTS
+  as
+  scSecrets
+} from 'styled-components'
+const { StyleSheet } = scSecrets
+
+[actions.setRendered]: function * ({ payload }) {
+  if (rendered) {
+    return
+  }
+
+  if (isHeadless()) {
+    // append/expose styled-component styles to DOM so they can be served and cached
+    const obj = document.querySelectorAll('style[data-styled-components]')[0]
+    obj.outerHTML = StyleSheet.instance.toHTML()
+

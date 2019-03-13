@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width initial-scale=1 user-scalable=no"
+    />
+    <title>WC Nordic 2019 presentation</title>
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P|Source+Code+Pro|Source+Sans+Pro:400,700" rel="stylesheet">
+
+    <style>
+      .spectacle-content.spectacle-content { /* lol */
+        max-width: 1200px; /* Show code samples a bit wider */
+        max-height: initial;
+        /* position: relative;
+        top: -50%;
+        transform: translateY(100%); */
+      }
+
+      /* Also show code samples a bit wider */
+      :not(body.notnotmalmode) pre {
+        max-width: 1000px;
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+
+
+      /* @media print { */
+        /* iframe {
+          opacity: 0;
+          position: relative;
+        } */
+
+        /* spectacle-code-slide says hello */
+        body.notnormalmode h1[style*="position: fixed"],
+        body.notnormalmode div[style*="position: fixed"]
+         {
+          display: none;
+        }
+      /* } */
+    </style>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/prismjs@1.10.0/themes/prism-okaidia.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="./dist/bundle.js"></script>
+  </body>
+</html>

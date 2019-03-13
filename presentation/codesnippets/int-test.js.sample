@@ -1,0 +1,36 @@
+/**
+ * Function that receives a test running function as a parameter
+ * and returns a new function that returns a promise that resolves when
+ * the test function is done.
+ *
+ * Async makes things a bit complicated.
+ */
+const createTest = fn => () => new Promise(done => fn(global.__BROWSER__, done))
+
+const loginTest = createTest((browser) => {
+  // try/catch/finally blocks omitted to save space
+  describe('Login', () => {
+    const url = getFrontendHost()
+    let page
+
+    beforeAll(async () => {
+      page = await browser.newPage()
+      await page.goto(url)
+    })
+
+    afterAll(async () => {
+      await page.close()
+    })
+
+    it('should display login modal', async () => {
+      const button = await page.waitForSelector('#login-button')
+      expect(await (await button.getProperty('innerHTML')).jsonValue()).toBe('Kirjaudu')
+      await page.click('#login-button')
+      await page.waitForSelector('#login-modal')
+    })
+
+    it('should allow logging in', async () => {
+      await fillAndSubmitLoginModal(page)
+    })
+  })
+})

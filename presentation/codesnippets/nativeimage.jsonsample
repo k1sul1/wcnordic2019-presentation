@@ -1,0 +1,144 @@
+{ "wp:featuredmedia": [
+  {
+    "id": 856572,
+    "date": "2018-06-18T12:00:38",
+    "slug": "img_20180502_100125759",
+    "type": "attachment",
+    "link": "http://wpdev.local:8209/img_20180502_100125759/",
+    "title": {
+      "rendered": "IMG_20180502_100125759"
+    },
+    "author": 1,
+    "acf": [
+
+    ],
+    "caption": {
+      "rendered": ""
+    },
+    "alt_text": "",
+    "media_type": "image",
+    "mime_type": "image/jpeg",
+    "media_details": {
+      "width": 3456,
+      "height": 4608,
+      "file": "2018/06/img_20180502_100125759.jpg",
+      "sizes": {
+        "thumbnail": {
+          "file": "img_20180502_100125759-150x150.jpg",
+          "width": 150,
+          "height": 150,
+          "mime_type": "image/jpeg",
+          "source_url": "http://wpdev.local:8209/wp-content/uploads/2018/06/img_20180502_100125759-150x150.jpg"
+        },
+        "medium": {
+          "file": "img_20180502_100125759-225x300.jpg",
+          "width": 225,
+          "height": 300,
+          "mime_type": "image/jpeg",
+          "source_url": "http://wpdev.local:8209/wp-content/uploads/2018/06/img_20180502_100125759-225x300.jpg"
+        },
+        "medium_large": {
+          "file": "img_20180502_100125759-768x1024.jpg",
+          "width": 768,
+          "height": 1024,
+          "mime_type": "image/jpeg",
+          "source_url": "http://wpdev.local:8209/wp-content/uploads/2018/06/img_20180502_100125759-768x1024.jpg"
+        },
+        "large": {
+          "file": "img_20180502_100125759-768x1024.jpg",
+          "width": 768,
+          "height": 1024,
+          "mime_type": "image/jpeg",
+          "source_url": "http://wpdev.local:8209/wp-content/uploads/2018/06/img_20180502_100125759-768x1024.jpg"
+        },
+        "list-image": {
+          "file": "img_20180502_100125759-300x400.jpg",
+          "width": 300,
+          "height": 400,
+          "mime_type": "image/jpeg",
+          "source_url": "http://wpdev.local:8209/wp-content/uploads/2018/06/img_20180502_100125759-300x400.jpg"
+        },
+        "slider": {
+          "file": "img_20180502_100125759-630x400.jpg",
+          "width": 630,
+          "height": 400,
+          "mime_type": "image/jpeg",
+          "source_url": "http://wpdev.local:8209/wp-content/uploads/2018/06/img_20180502_100125759-630x400.jpg"
+        },
+        "wide": {
+          "file": "img_20180502_100125759-1620x2160.jpg",
+          "width": 1620,
+          "height": 2160,
+          "mime_type": "image/jpeg",
+          "source_url": "http://wpdev.local:8209/wp-content/uploads/2018/06/img_20180502_100125759-1620x2160.jpg"
+        },
+        "full": {
+          "file": "img_20180502_100125759.jpg",
+          "width": 3456,
+          "height": 4608,
+          "mime_type": "image/jpeg",
+          "source_url": "http://wpdev.local:8209/wp-content/uploads/2018/06/img_20180502_100125759.jpg"
+        }
+      },
+      "image_meta": {
+        "aperture": "2",
+        "credit": "",
+        "camera": "XT1635-02",
+        "caption": "",
+        "created_timestamp": "1525255285",
+        "copyright": "",
+        "focal_length": "4.68",
+        "iso": "100",
+        "shutter_speed": "0.02",
+        "title": "",
+        "orientation": "0",
+        "keywords": [
+
+        ]
+      }
+    },
+    "source_url": "http://wpdev.local:8209/wp-content/uploads/2018/06/img_20180502_100125759.jpg",
+    "_links": {
+      "self": [
+        {
+          "attributes": [
+
+          ],
+          "href": "http://wpdev.local:8209/wp-json/wp/v2/media/856572"
+        }
+      ],
+      "collection": [
+        {
+          "attributes": [
+
+          ],
+          "href": "http://wpdev.local:8209/wp-json/wp/v2/media"
+        }
+      ],
+      "about": [
+        {
+          "attributes": [
+
+          ],
+          "href": "http://wpdev.local:8209/wp-json/wp/v2/types/attachment"
+        }
+      ],
+      "author": [
+        {
+          "attributes": {
+            "embeddable": true
+          },
+          "href": "http://wpdev.local:8209/wp-json/wp/v2/users/1"
+        }
+      ],
+      "replies": [
+        {
+          "attributes": {
+            "embeddable": true
+          },
+          "href": "http://wpdev.local:8209/wp-json/wp/v2/comments?post=856572"
+        }
+      ]
+    }
+  }
+] }

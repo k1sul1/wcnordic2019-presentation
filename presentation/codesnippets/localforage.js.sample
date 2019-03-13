@@ -1,0 +1,267 @@
+// version.js
+export const current = 'new-feature-broke-stuff'
+
+const sampleVersion = {
+  version: '20270101',
+  invalidateDiskStorage: false, // Will clear ALL disk saved data
+  invalidateStores: ['requestCache', 'userData'], // Will clear stores with corresponding names
+}
+
+// Don't go backwards in versions.
+// If something hits the fan, rollback using git revert,
+// and add a new version. The version compare logic will fail if you neglect this.
+export const versions = [
+  {
+    version: 'new-feature-broke-stuff',
+    invalidateStores: ['requestCache'],
+  },
+  {
+    version: '20190225',
+    invalidateStores: true,
+  },
+  // ...
+].reverse()
+export const getVersion = key => versions.find(({ version }) => version === key)
+export const currentVersion = getVersion(current)
+
+export const getVersionIndex = version => versions.findIndex(
+  ({ version: v }) => v === version
+)
+export const getVersionsBetween = (a, b) => versions.slice(
+  getVersionIndex(a) + 1,
+  getVersionIndex(b)
+)
+export default currentVersion
+
+// DiskStorage.js
+import localforage from 'localforage'
+import XXH from 'xxhashjs'
+import { current, getVersion, getVersionsBetween, currentVersion } from '../version'
+
+export let userData
+export let requestCache
+
+try {
+  requestCache = localforage.createInstance({
+    name: 'requestCache',
+  })
+
+  userData = localforage.createInstance({
+    name: 'userData',
+  })
+} catch (e) {
+  console.log('Failed initalizing localforage', e)
+}
+
+export default class DiskStorage {
+  constructor (store) {
+    if (!store) {
+      throw new TypeError('store is mandatory')
+    }
+
+    this.store = store
+    this.driver = store.driver()
+
+    this.get = this.get.bind(this)
+    this.put = this.put.bind(this)
+    this.nuked = false
+  }
+
+  getKey (key) {
+    return XXH.h32(JSON.stringify(key), 0xABCD).toString(16)
+  }
+
+  async get (key, config = {}) {
+    try {
+      const generatedKey = this.getKey(key)
+      const item = await this.store.getItem(generatedKey)
+
+      if (!item) {
+        return false
+      }
+
+      const data = JSON.parse(item)
+      const meta = data._meta
+
+      if (!meta) {
+        return false
+      }
+
+      const { expireAfter, version } = meta
+
+      if (version !== current && !this.nuked) { // Only nuke once.
+        const newerVersions = [
+          ...getVersionsBetween(version, current),
+          currentVersion,
+        ]
+
+        // User may have saved something while in version 1, a breaking change could've happened
+        // at version 2, and the next time the user visits the app, the app might be in version 4.
+        const shouldInvalidate = newerVersions.some(v => v.invalidateDiskStorage)
+
+        if (shouldInvalidate && !this.nuked) {
+          console.log('Nuking store contents')
+          await this.store.clear()
+          this.nuked = true
+          return false
+        }
+      }
+
+      const { acceptExpired } = config
+      const isExpired = Date.now() > expireAfter
+
+      // If expired, return false, except if explicitly allowed
+      return !isExpired ? data : acceptExpired ? { ...data, expired: true } : false
+    } catch (e) {
+      return e
+    }
+  }
+
+  async put (key, meta, data) {
+    try {
+      const generatedKey = this.getKey(key)
+      const result = await this.store.setItem(generatedKey, JSON.stringify({
+        ...data,
+        _meta: {
+          ...meta,
+          version: current,
+        },
+      }))
+
+      return result
+    } catch (e) {
+      return false
+    }
+  }
+}
+
+
+// CacheDriver.js
+/**
+ * LRU cache. Starts cleaning itself when it grows too big.
+ */
+class CacheDriver extends DiskStorage {
+  constructor (store, options = {}) {
+    const { orderMax = 1000 } = options
+    super(store)
+
+    this.reservedKeys = ['order']
+    this.orderMax = orderMax
+
+    this.store.keys().then(keys => {
+      if (keys.length > this.orderMax) {
+        this.clean('10%')
+      }
+    }).catch(e => console.log('Unable to check store size', e))
+
+    this.clean = this.clean.bind(this)
+
+    if (isDevelopment()) {
+      window.CacheDriver = this
+    }
+  }
+
+  async getOrder () {
+    try {
+      const order = await this.store.getItem('order')
+
+      if (order) {
+        return order
+      }
+
+      return []
+    } catch (e) {
+      console.log("Can't get order, private browsing?", e)
+      return []
+    }
+  }
+
+  async setOrder (order = []) {
+    // Limit the size to this.orderMax
+    if (order.length > this.orderMax) {
+      order.splice(0, this.orderMax)
+    }
+
+    try {
+      return this.store.setItem('order', order)
+    } catch (e) {
+      console.log("Can't set order, private browsing?", e)
+      return false
+    }
+  }
+
+  async get (...params) {
+    const [stringKey] = params
+    const key = super.getKey(stringKey)
+    const order = await this.getOrder()
+    const keyIndex = order.indexOf(key)
+
+    if (keyIndex > -1) {
+      order.splice(keyIndex, 1)
+    }
+
+    order.unshift(key)
+    this.setOrder(order)
+
+    return super.get(...params)
+  }
+
+  /**
+   * Clean cache to free disk space.
+   * @param amount Approximate amount of items to remove
+   */
+  async clean (amount = '10%') {
+    try {
+      console.log('Cleaning cache')
+      const order = await this.getOrder()
+      const allKeys = (await this.store.keys()).reduce((acc, x) => {
+        acc[x] = null
+        return acc
+      }, {})
+      const keys = Object.keys(omit(allKeys, [
+        ...this.reservedKeys,
+        order, // don't remove recently fetched
+      ]))
+
+      let removed = []
+      if (Number.isInteger(amount)) {
+        removed = keys.splice(amount * -1, amount)
+      } else if (amount.indexOf('%') > -1) {
+        const percentage = parseFloat(amount.replace('%', '')) / 100
+        const toRemove = parseInt(keys.length * percentage, 10)
+
+        removed = keys.splice(toRemove * -1, toRemove)
+      }
+
+      removed.map(async key => {
+        const item = await this.store.getItem(key)
+
+        this.store.removeItem(key)
+        return item
+      })
+
+      return removed
+    } catch (e) {
+      console.log('Unable to clean cache', e)
+      return false
+    }
+  }
+}
+
+export default CacheDriver
+
+// WP_Client.js
+/**
+ * Gross oversimplification
+ */
+class WP_Client {
+  async get (path, opts = {}) {
+    const response = api.req(path, opts)
+
+    if (opts.cache && this.cache) {
+      await this.cacheDriverInstance.put(url, opts.cache, response)
+    }
+
+    return response
+  }
+}

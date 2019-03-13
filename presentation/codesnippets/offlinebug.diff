@@ -1,0 +1,22 @@
+diff --git a/app/src/containers/App.js b/app/src/containers/App.js
+index 77284146..c9c3030e 100644
+--- a/app/src/containers/App.js
++++ b/app/src/containers/App.js
+@@ -9,6 +9,7 @@ import CookieConsent from 'react-cookie-consent'
+
+ import { is as errorIs, getType, RenderedError, logErrorBoundaryError } from '../lib/errors'
+ import application from '../kea/application'
++import downloadLogic from '../kea/downloads'
+ import headerLogic from '../kea/header'
+ import galleryLogic from '../kea/gallery'
+ import adsLogic from '../kea/ads'
+@@ -51,6 +52,9 @@ const theme = Object.assign(themeSettings, themeColours)
+       'updateSettings',
+       'start',
+     ],
++    downloadLogic, [
++      'ensureDownloaded',
++    ],
+     adsLogic, [
+       'setupAds'
+     ],

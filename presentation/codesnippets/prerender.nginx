@@ -1,0 +1,31 @@
+location / {
+  try_files $uri @prerender;
+}
+
+location @prerender {
+  set $prerender 0;
+
+  if ($http_user_agent ~* "amppari|SemrushBot|googlebot|bingbot|yandex|baiduspider|twitterbot|facebot|facebook|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest|slackbot|vkShare|W3C_Validator") {
+    set $prerender 1;
+  }
+
+  if ($uri ~* "\.(js|css|xml|less|png|jpg|jpeg|gif|pdf|doc|txt|ico|rss|zip|mp3|rar|exe|wmv|doc|avi|ppt|mpg|mpeg|tif|wav|mov|psd|ai|xls|mp4|m4a|swf|dat|dmg|iso|flv|m4v|torrent|ttf|woff|svg|eot)") {
+    set $prerender 0;
+  }
+
+  if ($prerender = 1) {
+    # See https://gist.github.com/thoop/8165802#file-nginx-conf-L38
+    set $prerender "prerender.hostname.com:3666";
+    proxy_pass http://$prerender;
+  }
+
+  add_header Last-Modified $date_gmt;
+  add_header Cache-Control 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0';
+  if_modified_since off;
+  expires off;
+  etag off;
+
+  if ($prerender = 0) {
+    rewrite .* /index.html break;
+  }
+}

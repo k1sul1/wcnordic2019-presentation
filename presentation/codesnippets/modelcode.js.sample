@@ -1,0 +1,67 @@
+class Article extends Component {
+  render() {
+    const { featuredImage, acfImage, content } = this.props
+
+    return (
+      <article>
+        <Image data={featuredImage} />
+        <HTML>{content}</HTML>
+        <Image data={acfImage} />
+      </article>
+    )
+  }
+}
+
+
+export default class ImageModel {
+  id
+  title
+  caption
+  credit
+  copyright
+  mediaType
+  mimeType
+  url
+  alt
+  sizes
+  width
+  height
+  srcSet
+  src
+
+  constructor (image) {
+    if (!image) return undefined
+    if (!image.kuva && image.url) {
+      image.kuva = image
+    }
+
+    if (image.kuva) { // an image from an ACF is slightly different from a normal image. Some APIs return the image wrapped inside kuva, some don't
+      this.id = image.kuva.id
+      this.title = image.kuva.id
+      this.caption = image.kuva.caption
+      this.credit = ''
+      this.copyright = image.kuva.copyright
+      this.mediaType = image.kuva.type
+      this.mimeType = image.kuva.mime_type
+      this.alt = image.kuva.alt || ''
+      this.sizes = normaliseSizes(image.kuva.sizes)
+      this.width = image.kuva.width
+      this.height = image.kuva.height
+      this.src = get(image, 'kuva.url', '')
+    } else {
+      this.id = image.id
+      this.title = get(image, 'title.rendered', '')
+      this.caption = get(image, 'caption.rendered', get(image, 'caption', ''))
+      this.credit = get(image, 'media_details.image_meta.credit', '')
+      this.copyright = get(image, 'media_details.image_meta.copyright', '')
+      this.mediaType = image.media_type
+      this.mimeType = image.mime_type
+      this.alt = image.alt_text || ''
+      this.sizes = get(image, 'media_details.sizes', {})
+      this.width = get(image, 'media_details.width', 0)
+      this.height = get(image, 'media_details.height', 0)
+      this.src = get(image, 'source_url', get(image, 'guid.rendered', ''))
+    }
+    this.srcSet = this.createSrcset()
+  }
+}
