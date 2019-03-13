@@ -7,4 +7,4 @@ Or look at the PDF. Your choice. PDF doesn't contain the full code samples.
 
 ## Promised toolkit plugin
 
-https://github.com/k1sul1/k1-apikit
+https://github.com/k1sul1/k1-kit
