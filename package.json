@@ -28,7 +28,7 @@
     "spectacle": "^5.3.0",
     "spectacle-code-slide": "^0.5.2",
     "spectacle-renderer": "^0.0.3",
-    "yarn": "^1.13.0"
+    "yarn": "^1.17.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",
